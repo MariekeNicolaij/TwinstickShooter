@@ -1,0 +1,23 @@
+Wave system
+Enemy spawn system
+Spawn Particles (kill, hit something)
+Fancy UI
+Gun shop
+Game over screen met level so far
+Score system
+Money system
+Item shop
+Sfeer
+Sounds
+Random World Gen
+Lange levensbalk bovenin van groen naar rood
+Reload system
+
+Upgrade shop
+- Reload time
+- Knockback force
+- Fire rate
+- Damage
+- Bullet color
+- Movementspeed
+- Health upgrade
