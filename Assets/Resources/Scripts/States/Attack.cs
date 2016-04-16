@@ -3,25 +3,28 @@ using System.Collections;
 
 public class Attack : State
 {
-    float damage;
-    float realDamage;
+    Player player;
 
-    public override void Start()
+    public override void Enter()
     {
-        GetSetDamage();
+        player = Player.instance;
     }
 
-    void GetSetDamage()
+    public override void Execute()
     {
-        damage = PlayerPrefs.GetInt("EnemyDamage", 5);
+        if (Vector3.Distance(owner.transform.position, player.transform.position) <= owner.attackDistance && !owner.AttackOnCooldown)
+        {
+            //Player.GetDamaged(owner.damage);
+            Debug.Log("Take that bitch");
+            owner.AttackOnCooldown = true;
+        }
+        else if (Vector3.Distance(owner.transform.position, player.transform.position) > owner.attackDistance)
+        {
+            owner.stateManager.ChangeState(new Follow());
+        }
     }
 
-    public override void Update()
-    {
-
-    }
-
-    public override void Stop()
+    public override void Exit()
     {
 
     }

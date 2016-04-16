@@ -3,81 +3,45 @@ using System.Collections;
 
 public class Wander : State
 {
-    Vector2[] directions = { Vector2.left, Vector2.right };
-    Vector2 direction;
+    Vector3 RandomPoint;
+    Player player;
 
-    float maxRandomTime = 6;
-    float randomIdleTime;
-    float randomWalkTime;
-
-    bool walk;
-
-    public override void Start()
+    public override void Enter()
     {
-        maxRandomTime = 6;
-        randomIdleTime = 0;
-        randomWalkTime = 0;
-        walk = false;
-
-        SetRandomIdleTime();
+        GenerateRandomPos();
+        player = Player.instance;
     }
 
-    public override void Update()
+    public override void Execute()
     {
-        WalkTimer();
-        Move();
-    }
+        Debug.DrawLine(owner.transform.position, RandomPoint);
 
-    public override void Stop()
-    {
-        walk = false;
-    }
-
-    void SetRandomIdleTime()
-    {
-        randomIdleTime = Random.Range(0, maxRandomTime);
-    }
-
-    void SetRandomWalkTime()
-    {
-        randomWalkTime = Random.Range(0, maxRandomTime);
-    }
-
-    void SetRandomDirection()
-    {
-        direction = directions[Random.Range(0, directions.Length)];
-    }
-
-    void WalkTimer()
-    {
-        if (walk)
+        if (Vector3.Distance(owner.transform.position,player.transform.position) <= owner.followDistance)
         {
-            randomWalkTime -= Time.smoothDeltaTime;
-
-            if (randomWalkTime < 0)
-            {
-                SetRandomIdleTime();
-                walk = false;
-            }
-
-            if (owner.GetComponent<Rigidbody>().velocity != Vector3.zero)
-                randomWalkTime += 0.001f;
+            owner.stateManager.ChangeState(new Follow());
+        }
+        else if (Vector3.Distance(owner.transform.position,RandomPoint) <= owner.attackDistance)
+        {
+            GenerateRandomPos();
         }
         else
         {
-            randomIdleTime -= Time.smoothDeltaTime;
-
-            if (randomIdleTime < 0)
-            {
-                SetRandomWalkTime();
-                SetRandomDirection();
-                walk = true;
-            }
+            owner.agent.SetDestination(RandomPoint);
         }
     }
 
-    void Move()
+    public override void Exit() { }
+
+    private void GenerateRandomPos()
     {
-        owner.transform.Translate(direction * Time.smoothDeltaTime * System.Convert.ToInt32(walk) * owner.speed);
+        Vector3 pos = new Vector3(Random.Range(owner.terrain.GetPosition().x, owner.terrain.terrainData.size.x),
+                    owner.terrain.GetPosition().y,
+                    Random.Range(owner.terrain.GetPosition().z, owner.terrain.terrainData.size.z));
+
+        NavMeshHit hit = new NavMeshHit();
+
+        NavMesh.SamplePosition(pos, out hit, 100, NavMesh.AllAreas);
+
+        RandomPoint = hit.position;
     }
 }
