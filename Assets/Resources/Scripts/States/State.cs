@@ -1,7 +1,7 @@
 ﻿public abstract class State
 {
     public Enemy owner;
-    public virtual void Start() { }
-    public virtual void Update() { }
-    public virtual void Stop() { }
+    public virtual void Enter() { }
+    public virtual void Execute() { }
+    public virtual void Exit() { }
 }

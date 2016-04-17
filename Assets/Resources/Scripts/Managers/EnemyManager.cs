@@ -15,10 +15,15 @@ public class EnemyManager : MonoBehaviour
     public float spawnTime = 60;
     float spawnTimeOutTime = 5;
 
+    public Terrain terrain;
+
 
     void Awake()
     {
         instance = this;
+
+        if (terrain == null)
+            Debug.LogError("setThe Terrain in the enemyManager pls");
     }
 
     void Update()

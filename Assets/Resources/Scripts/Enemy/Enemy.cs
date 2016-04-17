@@ -4,10 +4,17 @@ using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
-    StateManager stateManager;
+    [HideInInspector]
+    public StateManager stateManager;
     ParticleSystem bloodParticle;
 
     Money money;
+
+    [HideInInspector]
+    public Terrain terrain;
+
+    [HideInInspector]
+    public NavMeshAgent agent;
 
     public int health = 100;
     public int maxHealth;
@@ -20,19 +27,27 @@ public class Enemy : MonoBehaviour
     float moneyFloat;
     int dropMoney;
 
-    float attackDistance = 2;
-    float followDistance = 10;
+    public float attackDistance = 2;
+    public float followDistance = 10;
 
     bool isPlayingParticle;
     bool droppedTheMoney;
 
+    public float AttackCooldown = 5;
+    [HideInInspector]
+    public bool AttackOnCooldown = false;
+
+    private float counter = 0;
+
 
     public void Start()
     {
-        stateManager = new StateManager();
+        agent = GetComponent<NavMeshAgent>();
+        terrain = EnemyManager.instance.terrain;
+
+        stateManager = new StateManager(this,new Wander());
         bloodParticle = GetComponentInChildren<ParticleSystem>();
 
-        stateManager.owner = this;
         stateManager.Start();
         isPlayingParticle = false;
         droppedTheMoney = false;
@@ -40,6 +55,7 @@ public class Enemy : MonoBehaviour
         SetHealth();
         SetScore();
         SetMoneyDrop();
+
     }
 
     void SetHealth()
@@ -51,7 +67,7 @@ public class Enemy : MonoBehaviour
 
     void SetScore()
     {
-        preScore = PlayerPrefs.GetInt("Score", 1000);
+        preScore = PlayerPrefs.GetInt("DropScore", 1000);
         score = Mathf.RoundToInt(Random.Range(preScore / randomRange, preScore * randomRange));
     }
 
@@ -63,26 +79,16 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         stateManager.Update();
-        SetState();
         HealthCheck();
-    }
 
-    void SetState()
-    {
-        if (Vector3.Distance(transform.position, Player.instance.transform.position) < attackDistance)
+        if (AttackOnCooldown)
         {
-            if (stateManager.currentState.ToString() != "Attack")
-                stateManager.ChangeState(new Attack());
-        }
-        else if (Vector3.Distance(transform.position, Player.instance.transform.position) < followDistance)
-        {
-            if (stateManager.currentState.ToString() != "Follow")
-                stateManager.ChangeState(new Follow());
-        }
-        else
-        {
-            if (stateManager.currentState.ToString() != "Wander")
-                stateManager.ChangeState(new Wander());
+            if (counter >= AttackCooldown)
+            {
+                AttackOnCooldown = false;
+                counter = 0;
+            }
+            counter += Time.deltaTime;
         }
     }
 

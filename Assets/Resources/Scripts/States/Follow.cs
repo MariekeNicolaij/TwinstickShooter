@@ -3,27 +3,36 @@ using System.Collections;
 
 public class Follow : State
 {
-    Vector2 playerPos;
+    Vector3 playerPos;
+    Player player;
 
-    public override void Start()
+    public override void Enter()
     {
-        
+        player = Player.instance;
+        playerPos = player.transform.position;
     }
 
-    public override void Update()
+    public override void Execute()
     {
-        FollowPlayer();
+        if (playerPos != player.transform.position)
+            playerPos = player.transform.position;
+
+        if (Vector3.Distance(playerPos,owner.transform.position) <= owner.attackDistance)
+        {
+            owner.stateManager.ChangeState(new Attack());
+        }
+        else if (Vector3.Distance(playerPos,owner.transform.position)<= owner.followDistance)
+        {
+            owner.agent.SetDestination(playerPos);
+        }
+        else
+        {
+            owner.stateManager.ChangeToDefault();
+        }
     }
 
-    public override void Stop()
+    public override void Exit()
     {
 
-    }
-
-    void FollowPlayer()
-    {
-        playerPos = Player.instance.transform.position;
-        //owner.transform.Translate(playerPos * Time.smoothDeltaTime * owner.speed);
-        Vector3.MoveTowards(owner.transform.position, playerPos, owner.speed * Time.smoothDeltaTime);
     }
 }
