@@ -16,11 +16,11 @@ public class Wander : State
     {
         Debug.DrawLine(owner.transform.position, RandomPoint);
 
-        if (Vector3.Distance(owner.transform.position,player.transform.position) <= owner.followDistance)
+        if (Vector3.Distance(owner.transform.position, player.transform.position) <= owner.followDistance)
         {
             owner.stateManager.ChangeState(new Follow());
         }
-        else if (Vector3.Distance(owner.transform.position,RandomPoint) <= owner.attackDistance)
+        else if (Vector3.Distance(owner.transform.position, RandomPoint) <= owner.attackDistance)
         {
             GenerateRandomPos();
         }

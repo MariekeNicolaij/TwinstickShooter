@@ -7,11 +7,14 @@ public class Player : MonoBehaviour
 {
     public static Player instance;
 
+    public Laser redDotSight;
+    public Laser enemyPointer;
+
     public Text healthText;
     public Text scoreText;
     public Text moneyText;
 
-    public int health;
+    public int health, maxHealth;
     public int moveSpeed;
     public int bulletSpeed;
     public int bulletDamage;
@@ -23,6 +26,7 @@ public class Player : MonoBehaviour
     float shootDelayTime;
 
     bool canShoot = true;
+    bool dead;
 
     float rotateOffset = 15;
     float bulletOffset = 0.5f;
@@ -37,16 +41,16 @@ public class Player : MonoBehaviour
 
     void GetStats()
     {
-        health = PlayerPrefs.HasKey("PlayerHealth") ? PlayerPrefs.GetInt("PlayerHealth") : 100;
-        moveSpeed = PlayerPrefs.HasKey("PlayerMovementSpeed") ? PlayerPrefs.GetInt("PlayerMovementSpeed") : 3;
+        maxHealth = PlayerPrefs.HasKey("PlayerHealth") ? PlayerPrefs.GetInt("PlayerHealth") : 100;
+        moveSpeed = PlayerPrefs.HasKey("PlayerMovementSpeed") ? PlayerPrefs.GetInt("PlayerMovementSpeed") : 5;
         bulletSpeed = PlayerPrefs.HasKey("BulletSpeed") ? PlayerPrefs.GetInt("BulletSpeed") : 500;
         bulletDamage = PlayerPrefs.HasKey("BulletDamage") ? PlayerPrefs.GetInt("BulletDamage") : 10;
-        shootDelay = PlayerPrefs.HasKey("ShootDelay") ? PlayerPrefs.GetFloat("ShootDelay") : 0.8f;
+        shootDelay = PlayerPrefs.HasKey("ShootDelay") ? PlayerPrefs.GetFloat("ShootDelay") : 0.75f;
         knockbackForce = PlayerPrefs.HasKey("KnockbackForce") ? PlayerPrefs.GetInt("KnockbackForce") : 50;
         score = PlayerPrefs.HasKey("CurrentScore") ? PlayerPrefs.GetInt("CurrentScore") : 0;
         money = PlayerPrefs.HasKey("CurrentMoney") ? PlayerPrefs.GetInt("CurrentMoney") : 0;
 
-        PlayerPrefs.SetInt("PlayerHealth", health);
+        PlayerPrefs.SetInt("PlayerHealth", maxHealth);
         PlayerPrefs.SetInt("PlayerMovementSpeed", moveSpeed);
         PlayerPrefs.SetInt("BulletSpeed", bulletSpeed);
         PlayerPrefs.SetInt("BulletDamage", bulletDamage);
@@ -54,23 +58,58 @@ public class Player : MonoBehaviour
         PlayerPrefs.SetInt("KnockbackForce", knockbackForce);
         PlayerPrefs.SetInt("CurrentScore", score);
         PlayerPrefs.SetInt("CurrentMoney", money);
+
+        health = maxHealth;
     }
 
     public void Update()
     {
+        Debug.Log("CanMoveDirection");
+        Debug.Log("Automatic Coin pickup");
+        Debug.Log("Upgrade screen fix");
+
+        DeadCheck();
         ShootTimer();
-        if (Input.GetKeyDown(KeyCode.M))
+        RedDotSight();
+        EnemyPointer();
+
+        if (Input.GetKey(KeyCode.M))
             money += 1000;
+    }
+
+    void DeadCheck()
+    {
+        if (health > 0)
+            return;
+        if (!dead)
+            UpgradeShop.instance.StartUpgradeShop();
+        dead = true;
+    }
+
+    void RedDotSight()
+    {
+        if (EnemyManager.instance.enemies.Count > 0 || health > 0)
+            redDotSight.BeamLaser(new Vector3[2] { transform.position, transform.position + transform.forward * redDotSight.laserLength });
+        else
+            redDotSight.BeamLaser(new Vector3[2] { transform.position, transform.position });
+    }
+
+    void EnemyPointer()
+    {
+        if (EnemyManager.instance.spawnTime <= 0 && EnemyManager.instance.enemies.Count > 0 && health > 0)
+            enemyPointer.BeamLaser(new Vector3[2] { transform.position, EnemyManager.instance.ClosestEnemyPosition() });
+        else
+            enemyPointer.BeamLaser(new Vector3[2] { transform.position, transform.position });
     }
 
     void OnTriggerEnter(Collider other)
     {
         CollectMoney(other);
+        CollectHealth(other);
     }
 
     bool CanMovePointedDirection(float x, float y)
     {
-        Debug.Log("Dit moet nog");
         return true;
     }
 
@@ -98,7 +137,7 @@ public class Player : MonoBehaviour
 
     public void Shoot(float leftAxis, float rightAxis)
     {
-        if (!canShoot)
+        if (!canShoot || EnemyManager.instance.spawnTime <= 0 && EnemyManager.instance.enemies.Count == 0)
             return;
 
         bool left = leftAxis > 0 ? true : false;
@@ -149,14 +188,27 @@ public class Player : MonoBehaviour
     {
         if (other.gameObject.layer == (int)Layers.Money)
         {
-            money += other.GetComponent<Money>().value;
+            money += other.GetComponent<Pickup>().value;
             moneyText.text = "Money: $" + money;
-            ShowText.instance.AddValue(other.GetComponent<Money>().value, true, "+ $");
-            PoolManager.DestroyMoney(other.GetComponent<Money>());
+            PickupText.instance.AddValue(Pickups.Money, other.GetComponent<Pickup>().value, "+ $");
+            PoolManager.DestroyMoney(other.GetComponent<Pickup>());
             PlayerPrefs.SetInt("CurrentMoney", money);
         }
     }
 
+    void CollectHealth(Collider other)
+    {
+        if (other.gameObject.layer == (int)Layers.HealthPickup && health < maxHealth)
+        {
+            health += other.GetComponent<Pickup>().value;
+            if (health > maxHealth)
+                health = maxHealth;
+            healthText.text = "Health: " + health + "/" + maxHealth;
+
+            PickupText.instance.AddValue(Pickups.Health, other.GetComponent<Pickup>().value, "+");
+            PoolManager.DestroyHealth(other.GetComponent<Pickup>());
+        }
+    }
 
 
 

@@ -4,6 +4,8 @@ using System.Collections;
 
 public class UpgradeShop : MonoBehaviour
 {
+    public static UpgradeShop instance;
+
     public GameObject ingame;
     public GameObject upgradeShop;
 
@@ -27,7 +29,8 @@ public class UpgradeShop : MonoBehaviour
     int shootDelayCost;
     int knockbackForceCost;
     int rainbowBulletsCost;
-    int multiplyer = 2;
+    float multiplyer = 1.5f;
+    int maxMovespeed = 20;
     int maxKnockbackForce = 0;
     float maxShootDelay = 0.1f;
     #endregion
@@ -52,6 +55,11 @@ public class UpgradeShop : MonoBehaviour
     public Button rainbowBulletsButton;
     #endregion
 
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     public void StartUpgradeShop()
     {
@@ -99,13 +107,13 @@ public class UpgradeShop : MonoBehaviour
 
     void SetButtonsGray()
     {
-            healthButton.interactable = Player.instance.money < healthCost;
-            moveSpeedButton.interactable = Player.instance.money < moveSpeedCost;
-            bulletSpeedButton.interactable = Player.instance.money < bulletSpeedCost;
-            bulletDamageButton.interactable = Player.instance.money < bulletDamageCost;
-            shootDelayButton.interactable = Player.instance.money < shootDelayCost && Player.instance.shootDelay > maxShootDelay;
-            knockbackForceButton.interactable = Player.instance.money < knockbackForceCost && Player.instance.knockbackForce > maxKnockbackForce;
-            rainbowBulletsButton.interactable = Player.instance.money < rainbowBulletsCost && !System.Convert.ToBoolean(PlayerPrefs.GetInt("BulletRainbow"));
+        healthButton.interactable = Player.instance.money > healthCost;
+        moveSpeedButton.interactable = Player.instance.money > moveSpeedCost && Player.instance.moveSpeed < maxMovespeed;
+        bulletSpeedButton.interactable = Player.instance.money > bulletSpeedCost;
+        bulletDamageButton.interactable = Player.instance.money > bulletDamageCost;
+        shootDelayButton.interactable = Player.instance.money > shootDelayCost && Player.instance.shootDelay > maxShootDelay;
+        knockbackForceButton.interactable = Player.instance.money > knockbackForceCost && Player.instance.knockbackForce > maxKnockbackForce;
+        rainbowBulletsButton.interactable = Player.instance.money > rainbowBulletsCost && !System.Convert.ToBoolean(PlayerPrefs.GetInt("BulletRainbow"));
     }
 
     void SetStats()
@@ -114,7 +122,7 @@ public class UpgradeShop : MonoBehaviour
             "Movement Speed: " + PlayerPrefs.GetInt("PlayerMovementSpeed") + "\n" +
             "Bullet Speed: " + PlayerPrefs.GetInt("BulletSpeed") + "\n" +
             "Bullet Damage: " + PlayerPrefs.GetInt("BulletDamage") + "\n" +
-            "Shoot Delay: " + PlayerPrefs.GetInt("ShootDelay") + "\n" +
+            "Shoot Delay: " + PlayerPrefs.GetFloat("ShootDelay") + "\n" +
             "Knockback Force: " + PlayerPrefs.GetInt("KnockbackForce") + "\n" +
             "Rainbow Bullets: " + (System.Convert.ToBoolean(PlayerPrefs.GetInt("BulletRainbow")) ? "Yes" : "No");
         moneyText.text = "$ " + Player.instance.money;
@@ -122,10 +130,10 @@ public class UpgradeShop : MonoBehaviour
 
     void Update()
     {
-        if (upgradeShop.activeInHierarchy)
-            SetStats();
         if (lerp)
             LerpScreen();
+        if (upgradeShop.activeInHierarchy)
+            SetStats();
     }
 
     void LerpIngame()
@@ -161,8 +169,9 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= healthCost)
                 {
                     Player.instance.money -= healthCost;
-                    PlayerPrefs.SetInt("PlayerHealth", Player.instance.health + 50);
-                    PlayerPrefs.SetInt("HealthCost", healthCost * multiplyer);
+                    Player.instance.maxHealth += 50;
+                    PlayerPrefs.SetInt("PlayerHealth", Player.instance.maxHealth);
+                    PlayerPrefs.SetInt("HealthCost", Mathf.RoundToInt(healthCost * multiplyer));
                     SetCosts();
                     SetButtonsGray();
                 }
@@ -171,8 +180,9 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= moveSpeedCost)
                 {
                     Player.instance.money -= moveSpeedCost;
-                    PlayerPrefs.SetInt("PlayerMovementSpeed", Player.instance.moveSpeed + 1);
-                    PlayerPrefs.SetInt("MoveSpeedCost", moveSpeedCost * multiplyer);
+                    Player.instance.moveSpeed += 1;
+                    PlayerPrefs.SetInt("PlayerMovementSpeed", Player.instance.moveSpeed);
+                    PlayerPrefs.SetInt("MoveSpeedCost", Mathf.RoundToInt(moveSpeedCost * multiplyer));
                     SetCosts();
                     SetButtonsGray();
                 }
@@ -181,8 +191,9 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= bulletSpeedCost)
                 {
                     Player.instance.money -= bulletSpeedCost;
-                    PlayerPrefs.SetInt("BulletSpeed", Player.instance.bulletSpeed + 50);
-                    PlayerPrefs.SetInt("BulletSpeedCost", bulletSpeedCost * multiplyer);
+                    Player.instance.bulletSpeed += 50;
+                    PlayerPrefs.SetInt("BulletSpeed", Player.instance.bulletSpeed);
+                    PlayerPrefs.SetInt("BulletSpeedCost", Mathf.RoundToInt(bulletSpeedCost * multiplyer));
                     SetCosts();
                     SetButtonsGray();
                 }
@@ -191,8 +202,9 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= bulletDamageCost)
                 {
                     Player.instance.money -= bulletDamageCost;
-                    PlayerPrefs.SetInt("BulletDamage", Player.instance.bulletDamage + 5);
-                    PlayerPrefs.SetInt("BulletDamageCost", bulletDamageCost * multiplyer);
+                    Player.instance.bulletDamage += 5;
+                    PlayerPrefs.SetInt("BulletDamage", Player.instance.bulletDamage);
+                    PlayerPrefs.SetInt("BulletDamageCost", Mathf.RoundToInt(bulletDamageCost * multiplyer));
                     SetCosts();
                     SetButtonsGray();
                 }
@@ -201,8 +213,9 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= shootDelayCost)
                 {
                     Player.instance.money -= shootDelayCost;
-                    PlayerPrefs.SetFloat("ShootDelay", Player.instance.shootDelay - 0.1f);
-                    PlayerPrefs.SetInt("ShootDelayCost", shootDelayCost * multiplyer);
+                    Player.instance.shootDelay = Mathf.Round(Player.instance.shootDelay * 100 - 50) / 100;
+                    PlayerPrefs.SetFloat("ShootDelay", Player.instance.shootDelay);
+                    PlayerPrefs.SetInt("ShootDelayCost", Mathf.RoundToInt(shootDelayCost * multiplyer));
                     SetCosts();
                     SetButtonsGray();
                 }
@@ -211,8 +224,9 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= knockbackForceCost)
                 {
                     Player.instance.money -= knockbackForceCost;
-                    PlayerPrefs.SetInt("KnockbackForce", Player.instance.knockbackForce - 10);
-                    PlayerPrefs.SetInt("KnockbackForceCost", knockbackForceCost * multiplyer);
+                    Player.instance.knockbackForce -= 10;
+                    PlayerPrefs.SetInt("KnockbackForce", Player.instance.knockbackForce);
+                    PlayerPrefs.SetInt("KnockbackForceCost", Mathf.RoundToInt(knockbackForceCost * multiplyer));
                     SetCosts();
                     SetButtonsGray();
                 }
@@ -228,8 +242,9 @@ public class UpgradeShop : MonoBehaviour
         }
     }
 
-    public void NextLevelButton()
+    public void LevelButton()
     {
+        Time.timeScale = 1;
         PlayerPrefs.SetString("LoadLevel", Application.loadedLevelName);
         Application.LoadLevel("Loading");
     }

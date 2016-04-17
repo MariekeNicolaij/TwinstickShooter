@@ -3,22 +3,27 @@ using System.Collections;
 
 public class Attack : State
 {
-    Player player;
+    int preDamage;
+    int damage;
+    float randomRange = 1.5f;
+
 
     public override void Enter()
     {
-        player = Player.instance;
+        preDamage = PlayerPrefs.HasKey("EnemyDamage") ? PlayerPrefs.GetInt("EnemyDamage") : 10;
+        PlayerPrefs.SetInt("EnemyDamage", preDamage);
+        damage = Mathf.RoundToInt(Random.Range(preDamage / randomRange, preDamage * randomRange));
     }
 
     public override void Execute()
     {
-        if (Vector3.Distance(owner.transform.position, player.transform.position) <= owner.attackDistance && !owner.AttackOnCooldown)
+        if (Vector3.Distance(owner.transform.position, Player.instance.transform.position) <= owner.attackDistance && !owner.AttackOnCooldown)
         {
-            //Player.GetDamaged(owner.damage);
-            Debug.Log("Take that bitch");
+            Player.instance.health -= damage;
+            Player.instance.healthText.text = "Health: " + Player.instance.health + "/" + Player.instance.maxHealth;
             owner.AttackOnCooldown = true;
         }
-        else if (Vector3.Distance(owner.transform.position, player.transform.position) > owner.attackDistance)
+        else if (Vector3.Distance(owner.transform.position, Player.instance.transform.position) > owner.attackDistance)
         {
             owner.stateManager.ChangeState(new Follow());
         }

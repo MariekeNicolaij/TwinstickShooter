@@ -21,9 +21,12 @@ public class EnemyManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+    }
 
-        if (terrain == null)
-            Debug.LogError("setThe Terrain in the enemyManager pls");
+    void SetSpawnLimit()
+    {
+        spawnLimit = PlayerPrefs.HasKey("MaxEnemySpawn") ? PlayerPrefs.GetInt("MaxEnemySpawn") : 5;
+        PlayerPrefs.SetInt("MaxEnemySpawn", spawnLimit);
     }
 
     void Update()
@@ -71,7 +74,7 @@ public class EnemyManager : MonoBehaviour
         return enemy;
     }
 
-    bool AreThereEnemiesLeft()
+    public bool AreThereEnemiesLeft()
     {
         if (EnemyManager.instance.spawnTime > 0)
             return true;
@@ -79,6 +82,23 @@ public class EnemyManager : MonoBehaviour
             return false;
         else
             return true;
+    }
+
+    public Vector3 ClosestEnemyPosition()
+    {
+        Vector3 closestPosition = enemies[0].transform.position;
+        float closestDistance = Vector3.Distance(enemies[0].transform.position, Player.instance.transform.position);
+
+        for (int i = 1; i < enemies.Count; i++)
+        {
+            float distance = Vector3.Distance(enemies[i].transform.position, Player.instance.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestPosition = enemies[i].transform.position;
+            }
+        }
+        return closestPosition;
     }
 
     public static void DespawnEnemy(Enemy enemy)

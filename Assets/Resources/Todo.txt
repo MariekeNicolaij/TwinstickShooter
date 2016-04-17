@@ -17,6 +17,7 @@ Geld mooi maken
 Enemmies mooi maken
 Upgrade screen fixen dat alles goed lerped en niet alleen de achtergrond
 Loading screen
+Abillities
 
 
 Upgrade shop

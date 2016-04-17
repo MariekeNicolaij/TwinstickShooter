@@ -8,7 +8,7 @@ public class Enemy : MonoBehaviour
     public StateManager stateManager;
     ParticleSystem bloodParticle;
 
-    Money money;
+    Pickup money, healthPickup;
 
     [HideInInspector]
     public Terrain terrain;
@@ -16,24 +16,24 @@ public class Enemy : MonoBehaviour
     [HideInInspector]
     public NavMeshAgent agent;
 
-    public int health = 100;
+    public int health;
     public int maxHealth;
     public float speed = 2.5f;
     float randomRange = 1.5f;
-    int moneyForce = 250;
+    int dropForce = 250;
 
     int preScore, score;
 
-    float moneyFloat;
-    int dropMoney;
+    int preMoney, preHealth;
+    int dropMoney, dropHealth;
 
     public float attackDistance = 2;
     public float followDistance = 10;
 
     bool isPlayingParticle;
-    bool droppedTheMoney;
+    bool dropped;
 
-    public float AttackCooldown = 5;
+    public float AttackCooldown = 2.5f;
     [HideInInspector]
     public bool AttackOnCooldown = false;
 
@@ -45,35 +45,44 @@ public class Enemy : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         terrain = EnemyManager.instance.terrain;
 
-        stateManager = new StateManager(this,new Wander());
+        stateManager = new StateManager(this, new Wander());
         bloodParticle = GetComponentInChildren<ParticleSystem>();
 
         stateManager.Start();
         isPlayingParticle = false;
-        droppedTheMoney = false;
+        dropped = false;
 
         SetHealth();
         SetScore();
         SetMoneyDrop();
-
+        SetHealthDrop();
     }
 
     void SetHealth()
     {
-        health = PlayerPrefs.GetInt("EnemyHealth", 100);
+        health = PlayerPrefs.HasKey("EnemyHealth") ? PlayerPrefs.GetInt("EnemyHealth") : 25;
         health = Mathf.RoundToInt(Random.Range(health / randomRange, health * randomRange));
+        PlayerPrefs.SetInt("EnemyHealth", health);
         maxHealth = health;
     }
 
     void SetScore()
     {
-        preScore = PlayerPrefs.GetInt("DropScore", 1000);
+        preScore = PlayerPrefs.HasKey("ScoreDrop") ? PlayerPrefs.GetInt("ScoreDrop") : 1000;
         score = Mathf.RoundToInt(Random.Range(preScore / randomRange, preScore * randomRange));
+        PlayerPrefs.SetInt("ScoreDrop", preScore);
     }
 
     void SetMoneyDrop()
     {
-        moneyFloat = PlayerPrefs.GetInt("MoneyDrop", 10);
+        preMoney = PlayerPrefs.HasKey("MoneyDrop") ? PlayerPrefs.GetInt("MoneyDrop") : 10;
+        PlayerPrefs.SetInt("MoneyDrop", preMoney);
+    }
+
+    void SetHealthDrop()
+    {
+        preHealth = PlayerPrefs.HasKey("HealthDrop") ? PlayerPrefs.GetInt("HealthDrop") : 5;
+        PlayerPrefs.SetInt("HealthDrop", preHealth);
     }
 
     void Update()
@@ -112,34 +121,41 @@ public class Enemy : MonoBehaviour
         {
             bloodParticle.Play();
             isPlayingParticle = true;
-            if (!droppedTheMoney)
+            if (!dropped)
             {
                 DropMoney();
+                DropHealthPickup();
                 Score();
+                dropped = true;
             }
         }
         if (bloodParticle.isStopped)
-        {
-            Debug.Log("Particle stopped");
             EnemyManager.DespawnEnemy(this);
-        }
     }
 
     void DropMoney()
     {
-        dropMoney = Mathf.RoundToInt(Random.Range(moneyFloat / randomRange, moneyFloat * randomRange));
+        dropMoney = Mathf.RoundToInt(Random.Range(preMoney / randomRange, preMoney * randomRange));
         money = PoolManager.SpawnMoney();
         money.transform.position = transform.position;
-        money.GetComponent<Rigidbody>().AddForce(Vector2.up * moneyForce);
+        money.GetComponent<Rigidbody>().AddForce(new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)) * dropForce);
         money.value = dropMoney;
-        droppedTheMoney = true;
+    }
+
+    void DropHealthPickup()
+    {
+        dropHealth = Mathf.RoundToInt(Random.Range(preHealth / randomRange, preHealth * randomRange));
+        healthPickup = PoolManager.SpawnHealth();
+        healthPickup.transform.position = transform.position;
+        healthPickup.GetComponent<Rigidbody>().AddForce(new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)) * dropForce);
+        healthPickup.value = dropHealth;
     }
 
     void Score()
     {
         Player.instance.score += score;
         Player.instance.scoreText.text = "Score: " + score;
-        ShowText.instance.AddValue(score, false, "+");
+        PickupText.instance.AddValue(Pickups.Score, score, "+");
         PlayerPrefs.SetInt("CurrentScore", Player.instance.score);
     }
 }

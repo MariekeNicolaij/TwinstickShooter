@@ -7,9 +7,10 @@ public class PoolManager : MonoBehaviour
 
     Pool<Bullet> bulletPool = new Pool<Bullet>();
     Pool<Enemy> enemyPool = new Pool<Enemy>();
-    Pool<Money> moneyPool = new Pool<Money>();
+    Pool<Pickup> moneyPool = new Pool<Pickup>();
+    Pool<Pickup> healthPool = new Pool<Pickup>();
 
-    public GameObject bulletPrefab, enemyPrefab, moneyPrefab;
+    public GameObject bulletPrefab, enemyPrefab, moneyPrefab, healthPrefab;
 
 
     void Start()
@@ -18,6 +19,7 @@ public class PoolManager : MonoBehaviour
         bulletPool.prefab = bulletPrefab;
         enemyPool.prefab = enemyPrefab;
         moneyPool.prefab = moneyPrefab;
+        healthPool.prefab = healthPrefab;
     }
 
     public static Bullet SpawnBullet(Vector3 startPosition, Vector3 direction, int damage)
@@ -44,13 +46,24 @@ public class PoolManager : MonoBehaviour
         return enemy;
     }
 
-    public static Money SpawnMoney()
+    public static Pickup SpawnMoney()
     {
-        Money money;
+        Pickup pickup;
 
-        instance.moneyPool.Spawn(out money);
+        instance.moneyPool.Spawn(out pickup);
+        pickup.Start();
 
-        return money;
+        return pickup;
+    }
+
+    public static Pickup SpawnHealth()
+    {
+        Pickup pickup;
+
+        instance.healthPool.Spawn(out pickup);
+        pickup.Start();
+
+        return pickup;
     }
 
     public static void DestroyBullet(Bullet bullet)
@@ -63,8 +76,13 @@ public class PoolManager : MonoBehaviour
         instance.enemyPool.Destroy(enemy);
     }
 
-    public static void DestroyMoney(Money money)
+    public static void DestroyMoney(Pickup pickup)
     {
-        instance.moneyPool.Destroy(money);
+        instance.moneyPool.Destroy(pickup);
+    }
+
+    public static void DestroyHealth(Pickup pickup)
+    {
+        instance.healthPool.Destroy(pickup);
     }
 }

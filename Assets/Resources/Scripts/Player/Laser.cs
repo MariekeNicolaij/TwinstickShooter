@@ -33,13 +33,8 @@ public class Laser : MonoBehaviour
         laser.SetWidth(beginWidth/widthDivider, endWidth/widthDivider);
     }
 
-    void Update()
+    public void BeamLaser(Vector3[] laserPositions)
     {
-        BeamLaser();
-    }
-
-    void BeamLaser()
-    {
-        laser.SetPositions(new Vector3[2] { transform.position, transform.position + transform.forward * laserLength});
+        laser.SetPositions(laserPositions);
     }
 }
