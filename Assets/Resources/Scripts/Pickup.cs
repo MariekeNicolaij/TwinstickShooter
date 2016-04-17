@@ -40,7 +40,6 @@ public class Pickup : MonoBehaviour
                 case Pickups.Score:
                     transform.position = Vector3.Lerp(transform.position, Player.instance.transform.position, Time.smoothDeltaTime * speed);
                     break;
-
             }
 
         }

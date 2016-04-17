@@ -20,7 +20,7 @@ public class Attack : State
         if (Vector3.Distance(owner.transform.position, Player.instance.transform.position) <= owner.attackDistance && !owner.AttackOnCooldown)
         {
             Player.instance.health -= damage;
-            Player.instance.healthText.text = "Health: " + Player.instance.health + "/" + Player.instance.maxHealth;
+            Player.instance.healthBarText.text = Player.instance.health + "/" + Player.instance.maxHealth;
             owner.AttackOnCooldown = true;
         }
         else if (Vector3.Distance(owner.transform.position, Player.instance.transform.position) > owner.attackDistance)

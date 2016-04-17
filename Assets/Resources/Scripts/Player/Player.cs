@@ -10,7 +10,8 @@ public class Player : MonoBehaviour
     public Laser redDotSight;
     public Laser enemyPointer;
 
-    public Text healthText;
+    public Image healthBarImage;
+    public Text healthBarText;
     public Text scoreText;
     public Text moneyText;
 
@@ -65,10 +66,10 @@ public class Player : MonoBehaviour
     public void Update()
     {
         Debug.Log("CanMoveDirection");
-        Debug.Log("Automatic Coin pickup");
         Debug.Log("Upgrade screen fix");
 
         DeadCheck();
+        HealthBar();
         ShootTimer();
         RedDotSight();
         EnemyPointer();
@@ -84,6 +85,11 @@ public class Player : MonoBehaviour
         if (!dead)
             UpgradeShop.instance.StartUpgradeShop();
         dead = true;
+    }
+
+    void HealthBar()
+    {
+        healthBarImage.color = Color.Lerp(Color.red, Color.green, health / maxHealth);
     }
 
     void RedDotSight()
@@ -203,7 +209,7 @@ public class Player : MonoBehaviour
             health += other.GetComponent<Pickup>().value;
             if (health > maxHealth)
                 health = maxHealth;
-            healthText.text = "Health: " + health + "/" + maxHealth;
+            healthBarText.text = health + "/" + maxHealth;
 
             PickupText.instance.AddValue(Pickups.Health, other.GetComponent<Pickup>().value, "+");
             PoolManager.DestroyHealth(other.GetComponent<Pickup>());
