@@ -38,28 +38,15 @@ public class LevelManager : MonoBehaviour
 
     void SaveStatsAndOpenUpgradeShop()
     {
-        PlayerPrefs.SetInt("PlayerHealth", Mathf.RoundToInt(PlayerPrefs.GetInt("PlayerHealth") * multiplyer));
-        PlayerPrefs.SetInt("PlayerMovementSpeed", Mathf.RoundToInt(PlayerPrefs.GetInt("PlayerMovementSpeed") * multiplyer));
         PlayerPrefs.SetInt("EnemyHealth", Mathf.RoundToInt(PlayerPrefs.GetInt("EnemyHealth") * multiplyer));
-        PlayerPrefs.SetInt("BulletDamage", Mathf.RoundToInt(PlayerPrefs.GetInt("BulletDamage") * multiplyer));
         PlayerPrefs.SetInt("EnemyDamage", Mathf.RoundToInt(PlayerPrefs.GetInt("EnemyDamage") * multiplyer));
         PlayerPrefs.SetInt("MoneyDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("MoneyDrop") * multiplyer));
         PlayerPrefs.SetInt("MaxEnemySpawn", Mathf.RoundToInt(PlayerPrefs.GetInt("MaxEnemySpawn") * multiplyer));
-        PlayerPrefs.SetInt("Score", Mathf.RoundToInt(PlayerPrefs.GetInt("Score") * multiplyer));
-        PlayerPrefs.SetInt("CurrentMoney", Mathf.RoundToInt(PlayerPrefs.GetInt("CurrentMoney") * multiplyer));
+        PlayerPrefs.SetInt("DropScore", Mathf.RoundToInt(PlayerPrefs.GetInt("DropScore") * multiplyer));
         PlayerPrefs.SetInt("Level", PlayerPrefs.GetInt("Level") + 1);
 
-        //Upgrade cost
-//- Reload time
-//- Knockback force
-//- Fire rate
-//- Damage
-//- Bullet color
-//- Movementspeed
-//- Health upgrade
-        Debug.Log("Hier!");
 
-        scripts.GetComponent<UpgradeShop>();
+        scripts.GetComponent<UpgradeShop>().StartUpgradeShop();
         Destroy(GetComponent<LevelManager>());
     }
 }

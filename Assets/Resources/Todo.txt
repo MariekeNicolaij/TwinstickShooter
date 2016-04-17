@@ -11,13 +11,19 @@ Sfeer
 Sounds
 Random World Gen
 Lange levensbalk bovenin van groen naar rood
-Reload system
+Nearest enemy pointer with linerenderer
+Player mooi maken
+Geld mooi maken
+Enemmies mooi maken
+Upgrade screen fixen dat alles goed lerped en niet alleen de achtergrond
+Loading screen
+
 
 Upgrade shop
 - Reload time
 - Knockback force
 - Fire rate
 - Damage
-- Bullet color
+- Bullet rainbow
 - Movementspeed
 - Health upgrade

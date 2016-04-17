@@ -6,21 +6,22 @@ using System.Collections;
 public class Player : MonoBehaviour
 {
     public static Player instance;
-    public SpawnManager spawnManager;
 
     public Text healthText;
     public Text scoreText;
     public Text moneyText;
 
-    public float health;
-    public float moveSpeed;
-    public float fireRate = 500;
-    public float knockbackForce = 75;
+    public int health;
+    public int moveSpeed;
+    public int bulletSpeed;
+    public int bulletDamage;
+    public float shootDelay;
+    public int knockbackForce;
     public int score;
     public int money;
 
-    [Range(0, 1)]
-    public float shootDelay = 0.2f;
+    float shootDelayTime;
+
     bool canShoot = true;
 
     float rotateOffset = 15;
@@ -36,17 +37,30 @@ public class Player : MonoBehaviour
 
     void GetStats()
     {
-        health = PlayerPrefs.GetInt("PlayerHealth", 100);
-        moveSpeed = PlayerPrefs.GetInt("PlayerMovementSpeed", 3);
-        fireRate = PlayerPrefs.GetInt("FireRate", 500);
-        knockbackForce = PlayerPrefs.GetInt("KnockbackForce", 100);
-        score = PlayerPrefs.GetInt("CurrentScore", 0);
-        money = PlayerPrefs.GetInt("CurrentMoney", 0);
+        health = PlayerPrefs.HasKey("PlayerHealth") ? PlayerPrefs.GetInt("PlayerHealth") : 100;
+        moveSpeed = PlayerPrefs.HasKey("PlayerMovementSpeed") ? PlayerPrefs.GetInt("PlayerMovementSpeed") : 3;
+        bulletSpeed = PlayerPrefs.HasKey("BulletSpeed") ? PlayerPrefs.GetInt("BulletSpeed") : 500;
+        bulletDamage = PlayerPrefs.HasKey("BulletDamage") ? PlayerPrefs.GetInt("BulletDamage") : 10;
+        shootDelay = PlayerPrefs.HasKey("ShootDelay") ? PlayerPrefs.GetFloat("ShootDelay") : 0.8f;
+        knockbackForce = PlayerPrefs.HasKey("KnockbackForce") ? PlayerPrefs.GetInt("KnockbackForce") : 50;
+        score = PlayerPrefs.HasKey("CurrentScore") ? PlayerPrefs.GetInt("CurrentScore") : 0;
+        money = PlayerPrefs.HasKey("CurrentMoney") ? PlayerPrefs.GetInt("CurrentMoney") : 0;
+
+        PlayerPrefs.SetInt("PlayerHealth", health);
+        PlayerPrefs.SetInt("PlayerMovementSpeed", moveSpeed);
+        PlayerPrefs.SetInt("BulletSpeed", bulletSpeed);
+        PlayerPrefs.SetInt("BulletDamage", bulletDamage);
+        PlayerPrefs.SetFloat("ShootDelay", shootDelay);
+        PlayerPrefs.SetInt("KnockbackForce", knockbackForce);
+        PlayerPrefs.SetInt("CurrentScore", score);
+        PlayerPrefs.SetInt("CurrentMoney", money);
     }
 
     public void Update()
     {
         ShootTimer();
+        if (Input.GetKeyDown(KeyCode.M))
+            money += 1000;
     }
 
     void OnTriggerEnter(Collider other)
@@ -56,7 +70,7 @@ public class Player : MonoBehaviour
 
     bool CanMovePointedDirection(float x, float y)
     {
-
+        Debug.Log("Dit moet nog");
         return true;
     }
 
@@ -105,11 +119,11 @@ public class Player : MonoBehaviour
         Vector3 startPos = transform.position;
         startPos += transform.right * offSet;
 
-        Vector3 dir = new Vector3(0, transform.localEulerAngles.y, 0);
+        Vector3 direction = new Vector3(0, transform.localEulerAngles.y, 0);
 
-        Bullet bullet = PoolManager.SpawnBullet(startPos, dir);
+        Bullet bullet = PoolManager.SpawnBullet(startPos, direction, bulletDamage);
         bullet.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        bullet.GetComponent<Rigidbody>().AddForce(transform.forward * fireRate);
+        bullet.GetComponent<Rigidbody>().AddForce(transform.forward * bulletSpeed);
     }
 
     void ShootTimer()
@@ -117,18 +131,18 @@ public class Player : MonoBehaviour
         if (canShoot)
             return;
 
-        if (shootDelay < 0)
+        if (shootDelayTime < 0)
         {
             canShoot = true;
-            shootDelay = 0.2f;
+            shootDelayTime = shootDelay;
         }
 
-        shootDelay -= Time.smoothDeltaTime;
+        shootDelayTime -= Time.smoothDeltaTime;
     }
 
     void AddKnockback(Vector3 direction)
     {
-        //GetComponent<Rigidbody>().AddForce(direction * knockbackForce);
+        GetComponent<Rigidbody>().AddForce(direction * knockbackForce);
     }
 
     void CollectMoney(Collider other)
@@ -141,5 +155,28 @@ public class Player : MonoBehaviour
             PoolManager.DestroyMoney(other.GetComponent<Money>());
             PlayerPrefs.SetInt("CurrentMoney", money);
         }
+    }
+
+
+
+
+
+    void OnGUI()
+    {
+        GUIStyle style = new GUIStyle();
+        style.alignment = TextAnchor.MiddleLeft;
+        style.fontSize = 20;
+        style.normal.textColor = Color.black;
+
+        GUI.Box(new Rect(Screen.width * 0.05f, Screen.height * 0.4f, 200, 100),
+            "Health: " + health + "\n" +
+            "Move Speed: " + moveSpeed + "\n" +
+            "Bullet Speed: " + bulletSpeed + "\n" +
+            "Bullet Damage: " + bulletDamage + "\n" +
+            "Shoot Delay: " + shootDelay + "\n" +
+            "Knockback Force: " + knockbackForce + "\n" +
+            "Rainbow bullet: " + PlayerPrefs.GetInt("RainbowBullet") + "\n" +
+            "Score: " + score + "\n" +
+            "Money: " + money, style);
     }
 }

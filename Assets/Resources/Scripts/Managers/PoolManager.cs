@@ -20,7 +20,7 @@ public class PoolManager : MonoBehaviour
         moneyPool.prefab = moneyPrefab;
     }
 
-    public static Bullet SpawnBullet(Vector3 startPosition, Vector3 direction)
+    public static Bullet SpawnBullet(Vector3 startPosition, Vector3 direction, int damage)
     {
         Bullet bullet;
 
@@ -28,7 +28,7 @@ public class PoolManager : MonoBehaviour
 
         //if (instance.bulletPool.Spawn(out bullet))
         {
-            bullet.SetBullet(startPosition, direction);
+            bullet.SetBullet(startPosition, direction, damage);
         }
         return bullet;
     }
