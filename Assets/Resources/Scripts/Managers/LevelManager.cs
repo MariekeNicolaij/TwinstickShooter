@@ -15,7 +15,8 @@ public class LevelManager : MonoBehaviour
 
     void GetSetLevelText()
     {
-        level = PlayerPrefs.GetInt("Level", 1);
+        level = PlayerPrefs.HasKey("Level") ? PlayerPrefs.GetInt("Level") : 1;
+        PlayerPrefs.SetInt("Level", level);
         levelText.text = "Level: " + level.ToString();
     }
 
@@ -27,16 +28,21 @@ public class LevelManager : MonoBehaviour
 
     void SaveStatsAndOpenUpgradeShop()
     {
-        PlayerPrefs.SetInt("EnemyHealth", Mathf.RoundToInt(PlayerPrefs.GetInt("EnemyHealth") * multiplyer));
-        PlayerPrefs.SetInt("EnemyDamage", Mathf.RoundToInt(PlayerPrefs.GetInt("EnemyDamage") * multiplyer));
-        PlayerPrefs.SetInt("HealthyDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("HealthyDrop") * multiplyer));
-        PlayerPrefs.SetInt("MoneyDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("MoneyDrop") * multiplyer));
-        PlayerPrefs.SetInt("ScoreDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("ScoreDrop") * multiplyer));
-        PlayerPrefs.SetInt("MaxEnemySpawn", Mathf.RoundToInt(PlayerPrefs.GetInt("MaxEnemySpawn") * multiplyer));
-        PlayerPrefs.SetInt("Level", PlayerPrefs.GetInt("Level") + 1);
+        if (Player.instance.health > 0)
+        {
+            Debug.Log("Klopt niet");
+            PlayerPrefs.SetInt("EnemyHealth", Mathf.RoundToInt(PlayerPrefs.GetInt("EnemyHealth") * multiplyer));
+            PlayerPrefs.SetInt("EnemyDamage", Mathf.RoundToInt(PlayerPrefs.GetInt("EnemyDamage") * multiplyer));
+            PlayerPrefs.SetInt("HealthyDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("HealthyDrop") * multiplyer));
+            PlayerPrefs.SetInt("MoneyDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("MoneyDrop") * multiplyer));
+            PlayerPrefs.SetInt("ScoreDrop", Mathf.RoundToInt(PlayerPrefs.GetInt("ScoreDrop") * multiplyer));
+            PlayerPrefs.SetInt("MaxEnemySpawn", Mathf.RoundToInt(PlayerPrefs.GetInt("MaxEnemySpawn") * multiplyer));
+            PlayerPrefs.SetInt("Level", PlayerPrefs.GetInt("Level") + 1);
+            PlayerPrefs.SetInt("CurrentMoney", Player.instance.money);
+            PlayerPrefs.SetInt("CurrentScore", Player.instance.score);
+        }
 
-
-        UpgradeShop.instance.GetComponent<UpgradeShop>().StartUpgradeShop();
+        UpgradeShop.instance.StartUpgradeShop();
         Destroy(GetComponent<LevelManager>());
     }
 }

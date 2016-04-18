@@ -154,8 +154,7 @@ public class Enemy : MonoBehaviour
     void Score()
     {
         Player.instance.score += score;
-        Player.instance.scoreText.text = "Score: " + score;
+        Player.instance.scoreText.text = "Score: " + Player.instance.score;
         PickupText.instance.AddValue(Pickups.Score, score, "+");
-        PlayerPrefs.SetInt("CurrentScore", Player.instance.score);
     }
 }

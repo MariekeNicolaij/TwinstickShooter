@@ -30,7 +30,7 @@ public class UpgradeShop : MonoBehaviour
     int knockbackForceCost;
     int rainbowBulletsCost;
     float multiplyer = 1.5f;
-    int maxMovespeed = 20;
+    int maxMovespeed = 15;
     int maxKnockbackForce = 0;
     float maxShootDelay = 0.1f;
     #endregion
@@ -202,7 +202,7 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= bulletDamageCost)
                 {
                     Player.instance.money -= bulletDamageCost;
-                    Player.instance.bulletDamage += 5;
+                    Player.instance.bulletDamage += 1;
                     PlayerPrefs.SetInt("BulletDamage", Player.instance.bulletDamage);
                     PlayerPrefs.SetInt("BulletDamageCost", Mathf.RoundToInt(bulletDamageCost * multiplyer));
                     SetCosts();
@@ -213,7 +213,7 @@ public class UpgradeShop : MonoBehaviour
                 if (Player.instance.money >= shootDelayCost)
                 {
                     Player.instance.money -= shootDelayCost;
-                    Player.instance.shootDelay = Mathf.Round(Player.instance.shootDelay * 100 - 50) / 100;
+                    Player.instance.shootDelay = Mathf.Round(Player.instance.shootDelay * 100 - 5) / 100;
                     PlayerPrefs.SetFloat("ShootDelay", Player.instance.shootDelay);
                     PlayerPrefs.SetInt("ShootDelayCost", Mathf.RoundToInt(shootDelayCost * multiplyer));
                     SetCosts();
@@ -234,6 +234,7 @@ public class UpgradeShop : MonoBehaviour
             case (int)Upgrade.BulletRainbowColor:
                 if (Player.instance.money >= rainbowBulletsCost)
                 {
+                    Player.instance.money -= rainbowBulletsCost;
                     PlayerPrefs.SetInt("BulletRainbow", 1);
                     SetCosts();
                     SetButtonsGray();

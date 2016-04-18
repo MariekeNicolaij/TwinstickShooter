@@ -48,8 +48,8 @@ public class Player : MonoBehaviour
         bulletDamage = PlayerPrefs.HasKey("BulletDamage") ? PlayerPrefs.GetInt("BulletDamage") : 10;
         shootDelay = PlayerPrefs.HasKey("ShootDelay") ? PlayerPrefs.GetFloat("ShootDelay") : 0.75f;
         knockbackForce = PlayerPrefs.HasKey("KnockbackForce") ? PlayerPrefs.GetInt("KnockbackForce") : 50;
-        score = PlayerPrefs.HasKey("CurrentScore") ? PlayerPrefs.GetInt("CurrentScore") : 0;
         money = PlayerPrefs.HasKey("CurrentMoney") ? PlayerPrefs.GetInt("CurrentMoney") : 0;
+        score = PlayerPrefs.HasKey("CurrentScore") ? PlayerPrefs.GetInt("CurrentScore") : 0;
 
         PlayerPrefs.SetInt("PlayerHealth", maxHealth);
         PlayerPrefs.SetInt("PlayerMovementSpeed", moveSpeed);
@@ -61,6 +61,10 @@ public class Player : MonoBehaviour
         PlayerPrefs.SetInt("CurrentMoney", money);
 
         health = maxHealth;
+
+        healthBarText.text = health + "/" + maxHealth;
+        moneyText.text = "Money: " + money;
+        scoreText.text = "Score: " + score;
     }
 
     public void Update()
@@ -83,18 +87,25 @@ public class Player : MonoBehaviour
         if (health > 0)
             return;
         if (!dead)
+        {
+            Debug.Log("money: " + money);
+            PlayerPrefs.SetInt("CurrentMoney", money);
+            PlayerPrefs.SetInt("CurrentScore", score);
+            Debug.Log("money: " + PlayerPrefs.GetInt("CurrentMoney"));
             UpgradeShop.instance.StartUpgradeShop();
+        }
         dead = true;
     }
 
     void HealthBar()
     {
-        healthBarImage.color = Color.Lerp(Color.red, Color.green, health / maxHealth);
+        float value = (float)health / (float)maxHealth;
+        healthBarImage.color = Color.Lerp(Color.red, Color.green, value);
     }
 
     void RedDotSight()
     {
-        if (EnemyManager.instance.enemies.Count > 0 || health > 0)
+        if (EnemyManager.instance.enemies.Count > 0 && !dead)
             redDotSight.BeamLaser(new Vector3[2] { transform.position, transform.position + transform.forward * redDotSight.laserLength });
         else
             redDotSight.BeamLaser(new Vector3[2] { transform.position, transform.position });
@@ -204,7 +215,7 @@ public class Player : MonoBehaviour
 
     void CollectHealth(Collider other)
     {
-        if (other.gameObject.layer == (int)Layers.HealthPickup && health < maxHealth)
+        if (other.gameObject.layer == (int)Layers.HealthPickup)
         {
             health += other.GetComponent<Pickup>().value;
             if (health > maxHealth)

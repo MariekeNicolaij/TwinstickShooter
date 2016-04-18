@@ -1,35 +1,27 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Loading : MonoBehaviour
 {
-    public Slider slider;
-    AsyncOperation syncOperation;
-    string levelName = "";
+    AsyncOperation operation;
+    bool loadingLevel = false;
+    int level;
 
-    void Start()
-    {
-        levelName = PlayerPrefs.GetString("LoadLevel");
-        SetOperation();
-    }
 
-    void SetOperation()
+    void Awake()
     {
-        if (levelName != null && levelName != string.Empty)
-            syncOperation = Application.LoadLevelAsync(levelName);
+        level = PlayerPrefs.GetInt("LoadLevel");
     }
 
     void Update()
     {
-        Load();
-    }
-
-    void Load()
-    {
-        if (syncOperation.progress < 0.9f)
-            slider.value = syncOperation.progress;
-        else
-            Application.LoadLevel(levelName);
+        if (!loadingLevel)
+        {
+            operation =  Application.LoadLevelAsync(level);
+            loadingLevel = true;
+        }
+        if (operation.isDone)
+            Application.LoadLevel(level);
     }
 }
